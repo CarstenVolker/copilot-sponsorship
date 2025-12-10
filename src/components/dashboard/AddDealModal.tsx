@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Sponsorship } from '@/types/sponsorship'
 import {
   Dialog,
@@ -23,33 +23,76 @@ import {
 } from '@/components/ui/select'
 import { Loader2 } from 'lucide-react'
 
+interface FormData {
+  brandName: string
+  productService: string
+  dealAmount: string
+  priority: string
+  contactName: string
+  contactEmail: string
+  contactPhone: string
+  description: string
+  deliverables: string
+  targetAudience: string
+  startDate: string
+  endDate: string
+  status: string
+}
+
 interface AddDealModalProps {
   isOpen: boolean
   onClose: () => void
   onSubmit: (deal: Sponsorship) => void
+  initialDeal?: Sponsorship | null
+}
+
+const INITIAL_FORM_STATE: FormData = {
+  brandName: '',
+  productService: '',
+  dealAmount: '',
+  priority: 'medium',
+  contactName: '',
+  contactEmail: '',
+  contactPhone: '',
+  description: '',
+  deliverables: '',
+  targetAudience: '',
+  startDate: '',
+  endDate: '',
+  status: 'pitch-received',
 }
 
 export default function AddDealModal({
   isOpen,
   onClose,
   onSubmit,
+  initialDeal,
 }: AddDealModalProps) {
   const [loading, setLoading] = useState(false)
-  const [formData, setFormData] = useState({
-    brandName: '',
-    productService: '',
-    dealAmount: '',
-    priority: 'medium',
-    contactName: '',
-    contactEmail: '',
-    contactPhone: '',
-    description: '',
-    deliverables: '',
-    targetAudience: '',
-    startDate: '',
-    endDate: '',
-    status: 'pitch-received',
-  })
+  const [formData, setFormData] = useState<FormData>(INITIAL_FORM_STATE)
+
+  // Sync form data when modal opens with a deal to edit
+  useEffect(() => {
+    if (isOpen && initialDeal) {
+      setFormData({
+        brandName: initialDeal.brandName,
+        productService: initialDeal.productService,
+        dealAmount: initialDeal.dealAmount.toString(),
+        priority: initialDeal.priority,
+        contactName: initialDeal.contactName,
+        contactEmail: initialDeal.contactEmail,
+        contactPhone: initialDeal.contactPhone || '',
+        description: initialDeal.description,
+        deliverables: initialDeal.deliverables.join(', '),
+        targetAudience: initialDeal.targetAudience || '',
+        startDate: initialDeal.startDate.toISOString().split('T')[0],
+        endDate: initialDeal.endDate.toISOString().split('T')[0],
+        status: initialDeal.status,
+      })
+    } else if (isOpen) {
+      setFormData(INITIAL_FORM_STATE)
+    }
+  }, [isOpen, initialDeal])
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -69,7 +112,7 @@ export default function AddDealModal({
     // Simulate submission
     setTimeout(() => {
       const newDeal: Sponsorship = {
-        id: Date.now().toString(),
+        id: initialDeal?.id || Date.now().toString(),
         brandName: formData.brandName,
         productService: formData.productService,
         dealAmount: parseFloat(formData.dealAmount),
@@ -89,21 +132,7 @@ export default function AddDealModal({
       }
 
       onSubmit(newDeal)
-      setFormData({
-        brandName: '',
-        productService: '',
-        dealAmount: '',
-        priority: 'medium',
-        contactName: '',
-        contactEmail: '',
-        contactPhone: '',
-        description: '',
-        deliverables: '',
-        targetAudience: '',
-        startDate: '',
-        endDate: '',
-        status: 'pitch-received',
-      })
+      setFormData(INITIAL_FORM_STATE)
       setLoading(false)
     }, 500)
   }
@@ -113,7 +142,7 @@ export default function AddDealModal({
       <DialogContent className="max-w-2xl bg-slate-800 border-slate-700 text-white max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-white text-2xl">
-            Create New Sponsorship Deal
+            {initialDeal ? 'Edit Sponsorship Deal' : 'Create New Sponsorship Deal'}
           </DialogTitle>
         </DialogHeader>
 
@@ -381,7 +410,9 @@ export default function AddDealModal({
             disabled={loading}
           >
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {loading ? 'Creating Deal...' : 'Create Deal'}
+            {loading 
+              ? (initialDeal ? 'Saving...' : 'Creating Deal...') 
+              : (initialDeal ? 'Save Changes' : 'Create Deal')}
           </Button>
         </DialogFooter>
       </DialogContent>

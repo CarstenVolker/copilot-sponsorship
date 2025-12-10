@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { Sponsorship, SponsorshipStatus } from '@/types/sponsorship'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -12,7 +13,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { MoreVertical, Eye, GripVertical } from 'lucide-react'
-import { useState } from 'react'
 import DealDetailsModal from './DealDetailsModal'
 
 const COLUMNS: { id: SponsorshipStatus; title: string }[] = [
@@ -35,13 +35,44 @@ const PRIORITY_COLORS: Record<string, string> = {
 
 interface KanbanBoardProps {
   sponsorships: Sponsorship[]
+  onEditDeal?: (deal: Sponsorship) => void
+  onUpdateDealStatus?: (dealId: string, newStatus: SponsorshipStatus) => void
 }
 
-export default function KanbanBoard({ sponsorships }: KanbanBoardProps) {
+export default function KanbanBoard({ sponsorships, onEditDeal, onUpdateDealStatus }: KanbanBoardProps) {
   const [selectedDeal, setSelectedDeal] = useState<Sponsorship | null>(null)
+  const [draggedDeal, setDraggedDeal] = useState<Sponsorship | null>(null)
+  const [dragOverColumn, setDragOverColumn] = useState<SponsorshipStatus | null>(null)
 
   const getSponsorshipsByStatus = (status: SponsorshipStatus) => {
     return sponsorships.filter((s) => s.status === status)
+  }
+
+  const handleDragStart = (e: React.DragEvent, deal: Sponsorship) => {
+    setDraggedDeal(deal)
+    e.dataTransfer.effectAllowed = 'move'
+  }
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'move'
+  }
+
+  const handleDragEnter = (columnId: SponsorshipStatus) => {
+    setDragOverColumn(columnId)
+  }
+
+  const handleDragLeave = () => {
+    setDragOverColumn(null)
+  }
+
+  const handleDrop = (e: React.DragEvent, columnId: SponsorshipStatus) => {
+    e.preventDefault()
+    if (draggedDeal && draggedDeal.status !== columnId) {
+      onUpdateDealStatus?.(draggedDeal.id, columnId)
+    }
+    setDraggedDeal(null)
+    setDragOverColumn(null)
   }
 
   return (
@@ -50,6 +81,7 @@ export default function KanbanBoard({ sponsorships }: KanbanBoardProps) {
         <div className="flex gap-6 min-w-max">
           {COLUMNS.map((column) => {
             const columnSponsors = getSponsorshipsByStatus(column.id)
+            const isOver = dragOverColumn === column.id
             return (
               <div key={column.id} className="flex-shrink-0 w-80">
                 {/* Column Header */}
@@ -68,8 +100,16 @@ export default function KanbanBoard({ sponsorships }: KanbanBoardProps) {
                   <div className="h-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full"></div>
                 </div>
 
-                {/* Cards Container */}
-                <div className="space-y-3 min-h-96">
+                {/* Cards Container - Drop Zone */}
+                <div
+                  className={`space-y-3 min-h-96 p-2 rounded-lg transition-colors ${
+                    isOver ? 'bg-slate-600/50 border-2 border-dashed border-blue-400' : ''
+                  }`}
+                  onDragOver={handleDragOver}
+                  onDragEnter={() => handleDragEnter(column.id)}
+                  onDragLeave={handleDragLeave}
+                  onDrop={(e) => handleDrop(e, column.id)}
+                >
                   {columnSponsors.length === 0 ? (
                     <div className="text-center py-8">
                       <Typography variant="muted" className="text-slate-400">
@@ -80,9 +120,13 @@ export default function KanbanBoard({ sponsorships }: KanbanBoardProps) {
                     columnSponsors.map((sponsor) => (
                       <div
                         key={sponsor.id}
+                        draggable
+                        onDragStart={(e) => handleDragStart(e, sponsor)}
                         className="group cursor-move"
                       >
-                        <Card className="bg-slate-700 border-slate-600 hover:border-blue-500 transition-all hover:shadow-lg hover:shadow-blue-500/20">
+                        <Card className={`bg-slate-700 border-slate-600 hover:border-blue-500 transition-all hover:shadow-lg hover:shadow-blue-500/20 ${
+                          draggedDeal?.id === sponsor.id ? 'opacity-50' : ''
+                        }`}>
                           <CardHeader className="pb-3">
                             <div className="flex items-start justify-between gap-2">
                               <div className="flex-1 min-w-0">
@@ -218,6 +262,7 @@ export default function KanbanBoard({ sponsorships }: KanbanBoardProps) {
         deal={selectedDeal}
         isOpen={!!selectedDeal}
         onClose={() => setSelectedDeal(null)}
+        onEdit={onEditDeal}
       />
     </>
   )

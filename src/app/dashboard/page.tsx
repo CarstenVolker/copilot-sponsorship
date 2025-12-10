@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { Sponsorship, SponsorshipStatus } from '@/types/sponsorship'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
@@ -20,12 +21,22 @@ import { Search, Settings, LogOut, Filter } from 'lucide-react'
 
 export default function DashboardPage() {
   const router = useRouter()
-  const { sponsorships, addSponsorship } = useSponsorships()
+  const { sponsorships, addSponsorship, updateSponsorship } = useSponsorships()
   const [searchQuery, setSearchQuery] = useState('')
   const [isAddDealOpen, setIsAddDealOpen] = useState(false)
+  const [editingDeal, setEditingDeal] = useState<Sponsorship | null>(null)
 
   const handleLogout = () => {
     router.push('/')
+  }
+
+  const handleEditDeal = (deal: Sponsorship) => {
+    setEditingDeal(deal)
+    setIsAddDealOpen(true)
+  }
+
+  const handleUpdateDealStatus = (dealId: string, newStatus: SponsorshipStatus) => {
+    updateSponsorship(dealId, { status: newStatus })
   }
 
   const filteredSponsorsips = sponsorships.filter((s) =>
@@ -163,18 +174,27 @@ export default function DashboardPage() {
 
         {/* Kanban Board */}
         <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
-          <KanbanBoard sponsorships={filteredSponsorsips} />
+          <KanbanBoard 
+            sponsorships={filteredSponsorsips} 
+            onEditDeal={handleEditDeal}
+            onUpdateDealStatus={handleUpdateDealStatus}
+          />
         </div>
       </main>
 
       {/* Add Deal Modal */}
       <AddDealModal
         isOpen={isAddDealOpen}
-        onClose={() => setIsAddDealOpen(false)}
+        onClose={() => {
+          setIsAddDealOpen(false)
+          setEditingDeal(null)
+        }}
         onSubmit={(deal) => {
           addSponsorship(deal)
           setIsAddDealOpen(false)
+          setEditingDeal(null)
         }}
+        initialDeal={editingDeal}
       />
     </div>
   )

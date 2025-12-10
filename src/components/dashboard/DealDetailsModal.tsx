@@ -42,12 +42,14 @@ interface DealDetailsModalProps {
   deal: Sponsorship | null
   isOpen: boolean
   onClose: () => void
+  onEdit?: (deal: Sponsorship) => void
 }
 
 export default function DealDetailsModal({
   deal,
   isOpen,
   onClose,
+  onEdit,
 }: DealDetailsModalProps) {
   if (!deal) return null
 
@@ -254,6 +256,10 @@ export default function DealDetailsModal({
           <Button
             variant="default"
             className="bg-blue-600 hover:bg-blue-700 text-white"
+            onClick={() => {
+              onEdit?.(deal)
+              onClose()
+            }}
           >
             <Edit className="h-4 w-4 mr-2" />
             Edit Deal
