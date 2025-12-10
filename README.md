@@ -20,6 +20,21 @@ A modern web application for content creators to manage their YouTube sponsorshi
 - **Shadcn UI**: High-quality React components
 - **Radix UI**: Accessible component primitives
 
+## Used Prompts for generation th eUX structure
+### Create UX Structure Plan 
+ 
+ Hello! Please act as a Lead UX Architect. Your Task is to create a detailed UX Structure Plan for a web application designed to manage a Youtube Sponsorship workflow. The final Output must be a single markdown (.md) file UX_Structure_Plan.md. Create this file in kanban-app/docs/ directory. The structure of this file is critical. It must use a hierarchical, indented list with box-drawing characters (like |-- and |--) to create a clear tree structure, exactly like the provided reference style. Application Concept: A Kanban board interface for a creator to manage Sponsorship deals. 
+ Required structure and Content for the .md file: Please create the plan with the following four main sections: 
+ 1. Navigation flow Outline the Primary user journey through the application, 
+ 2. Login Page Structure: Details the layout and all components of the Login screen. 
+ 3. DashboardPage Structure: This is the main Kanban board view. Break down its layout from the Header down to the individual Details on a Sponsorship Card. Ensure you list all nine stages as columns within the Kanban board structure. 
+ 4. "Add New Deal" Modal Structure: Describe the layout and form Elements of the popup modal used for creating a new deal. Your final Output should be a single block of text in the specified markdown Format, Ready to be saved a a .md file. Do not write any narrative text outside of the plan itself.
+
+### Create ShadCN UI component mapping prompt
+Please look at the @UX_Structure_Plan.md  and make an UI implementation using Shadcn ui as to what components will be used in the ui structure and where. And you should only write the name of the appropriate components to be used. Not the code. Save the mapping as markup file 
+kanban-app/docs/shadcn-ui-component-mapping.md
+  
+
 ## Getting Started
 
 ### Prerequisites
