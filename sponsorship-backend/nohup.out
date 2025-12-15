@@ -1,0 +1,8 @@
+[2025-12-15 09:23:35.243] INFO  Starting Sponsorship Backend Application [main.go:30]
+[2025-12-15 09:23:35.243] INFO  Environment: development | LogLevel: debug [main.go:31]
+[2025-12-15 09:23:35.243] INFO  Initializing database connection to localhost:5432 [main.go:34]
+[2025-12-15 09:23:35.249] DEBUG Database connection pool configured: MaxOpenConns=25, MaxIdleConns=5 [db.go:27]
+[2025-12-15 09:23:35.249] INFO  Database connection established successfully [main.go:40]
+[2025-12-15 09:23:35.249] DEBUG Creating router and registering handlers [main.go:43]
+[2025-12-15 09:23:35.249] INFO  Starting HTTP server on :8080 [main.go:48]
+[2025-12-15 09:23:35.292] FATAL Server failed: listen tcp :8080: bind: address already in use [main.go:50]
